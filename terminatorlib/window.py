@@ -705,6 +705,7 @@ class Window(Container, Gtk.Window):
         if maker.isinstance(old_parent, 'Notebook'):
             self.zoom_data['notebook_tabnum'] = old_parent.page_num(widget)
             self.zoom_data['notebook_label'] = old_parent.get_tab_label(widget).get_label()
+            self.zoom_data['notebook_color'] = old_parent.get_tab_label(widget).tab_color
 
         self.remove(self.zoom_data['old_child'])
         old_parent.remove(widget)
@@ -735,7 +736,8 @@ class Window(Container, Gtk.Window):
         if maker.isinstance(self.zoom_data['old_parent'], 'Notebook'):
             self.zoom_data['old_parent'].newtab(widget=widget, metadata={
                 'tabnum': self.zoom_data['notebook_tabnum'],
-                'label':  self.zoom_data['notebook_label']
+                'label':  self.zoom_data['notebook_label'],
+                'color':  self.zoom_data['notebook_color']
             })
         else:
             self.zoom_data['old_parent'].add(widget)
@@ -763,7 +765,8 @@ class Window(Container, Gtk.Window):
 
             metadata = {
                 'tabnum': pagenum,
-                'label': notebook.get_tab_label(child).get_label()
+                'label': notebook.get_tab_label(child).get_label(),
+                'color': notebook.get_tab_label(child).tab_color
             }
         else:
             metadata = None

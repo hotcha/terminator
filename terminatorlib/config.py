@@ -94,6 +94,8 @@ DEFAULTS = {
             'close_button_on_tab'   : True,
             'scroll_tabbar'         : False,
             'homogeneous_tabbar'    : True,
+            'tab_colors'            : '#d99a9a:#dab98a:#d3d38e:#a3cc9e:'
+                                      '#94c4cc:#a3add9:#cfa3cf',
             'hide_from_taskbar'     : False,
             'always_on_top'         : False,
             'hide_on_lose_focus'    : False,
@@ -604,6 +606,8 @@ class ConfigBase(Borg):
 
             if key == 'custom_url_handler':
                 keytype = 'string(default="")'
+            elif key == 'tab_colors':
+                keytype = 'string(default="%s")' % value
 
             section[key] = keytype
         configspecdata['global_config'] = section

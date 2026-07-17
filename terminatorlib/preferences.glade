@@ -1338,7 +1338,7 @@
                               </packing>
                             </child>
                             <child>
-                              <!-- n-columns=2 n-rows=5 -->
+                              <!-- n-columns=2 n-rows=6 -->
                               <object class="GtkGrid" id="grid4">
                                 <property name="visible">True</property>
                                 <property name="can-focus">False</property>
@@ -1442,6 +1442,120 @@
                                     <property name="left-attach">0</property>
                                     <property name="top-attach">4</property>
                                     <property name="width">2</property>
+                                  </packing>
+                                </child>
+                                <child>
+                                  <object class="GtkLabel" id="label_tab_colors">
+                                    <property name="visible">True</property>
+                                    <property name="can-focus">False</property>
+                                    <property name="label" translatable="yes">Tab colors:</property>
+                                    <property name="xalign">0</property>
+                                  </object>
+                                  <packing>
+                                    <property name="left-attach">0</property>
+                                    <property name="top-attach">5</property>
+                                  </packing>
+                                </child>
+                                <child>
+                                  <object class="GtkBox" id="tab_colors_box">
+                                    <property name="visible">True</property>
+                                    <property name="can-focus">False</property>
+                                    <property name="spacing">6</property>
+                                    <child>
+                                      <object class="GtkDrawingArea" id="tab_colorpicker_1">
+                                        <property name="width-request">24</property>
+                                        <property name="height-request">24</property>
+                                        <property name="events">GDK_BUTTON_PRESS_MASK | GDK_EXPOSURE_MASK</property>
+                                        <property name="valign">center</property>
+                                        <property name="visible">True</property>
+                                        <property name="can-focus">False</property>
+                                        <property name="tooltip-text" translatable="yes">Click to change this tab color</property>
+                                      </object>
+                                    </child>
+                                    <child>
+                                      <object class="GtkDrawingArea" id="tab_colorpicker_2">
+                                        <property name="width-request">24</property>
+                                        <property name="height-request">24</property>
+                                        <property name="events">GDK_BUTTON_PRESS_MASK | GDK_EXPOSURE_MASK</property>
+                                        <property name="valign">center</property>
+                                        <property name="visible">True</property>
+                                        <property name="can-focus">False</property>
+                                        <property name="tooltip-text" translatable="yes">Click to change this tab color</property>
+                                      </object>
+                                    </child>
+                                    <child>
+                                      <object class="GtkDrawingArea" id="tab_colorpicker_3">
+                                        <property name="width-request">24</property>
+                                        <property name="height-request">24</property>
+                                        <property name="events">GDK_BUTTON_PRESS_MASK | GDK_EXPOSURE_MASK</property>
+                                        <property name="valign">center</property>
+                                        <property name="visible">True</property>
+                                        <property name="can-focus">False</property>
+                                        <property name="tooltip-text" translatable="yes">Click to change this tab color</property>
+                                      </object>
+                                    </child>
+                                    <child>
+                                      <object class="GtkDrawingArea" id="tab_colorpicker_4">
+                                        <property name="width-request">24</property>
+                                        <property name="height-request">24</property>
+                                        <property name="events">GDK_BUTTON_PRESS_MASK | GDK_EXPOSURE_MASK</property>
+                                        <property name="valign">center</property>
+                                        <property name="visible">True</property>
+                                        <property name="can-focus">False</property>
+                                        <property name="tooltip-text" translatable="yes">Click to change this tab color</property>
+                                      </object>
+                                    </child>
+                                    <child>
+                                      <object class="GtkDrawingArea" id="tab_colorpicker_5">
+                                        <property name="width-request">24</property>
+                                        <property name="height-request">24</property>
+                                        <property name="events">GDK_BUTTON_PRESS_MASK | GDK_EXPOSURE_MASK</property>
+                                        <property name="valign">center</property>
+                                        <property name="visible">True</property>
+                                        <property name="can-focus">False</property>
+                                        <property name="tooltip-text" translatable="yes">Click to change this tab color</property>
+                                      </object>
+                                    </child>
+                                    <child>
+                                      <object class="GtkDrawingArea" id="tab_colorpicker_6">
+                                        <property name="width-request">24</property>
+                                        <property name="height-request">24</property>
+                                        <property name="events">GDK_BUTTON_PRESS_MASK | GDK_EXPOSURE_MASK</property>
+                                        <property name="valign">center</property>
+                                        <property name="visible">True</property>
+                                        <property name="can-focus">False</property>
+                                        <property name="tooltip-text" translatable="yes">Click to change this tab color</property>
+                                      </object>
+                                    </child>
+                                    <child>
+                                      <object class="GtkDrawingArea" id="tab_colorpicker_7">
+                                        <property name="width-request">24</property>
+                                        <property name="height-request">24</property>
+                                        <property name="events">GDK_BUTTON_PRESS_MASK | GDK_EXPOSURE_MASK</property>
+                                        <property name="valign">center</property>
+                                        <property name="visible">True</property>
+                                        <property name="can-focus">False</property>
+                                        <property name="tooltip-text" translatable="yes">Click to change this tab color</property>
+                                      </object>
+                                    </child>
+                                    <child>
+                                      <object class="GtkButton" id="tab_colors_reset_button">
+                                        <property name="label" translatable="yes">_Reset</property>
+                                        <property name="use-action-appearance">False</property>
+                                        <property name="visible">True</property>
+                                        <property name="can-focus">True</property>
+                                        <property name="receives-default">False</property>
+                                        <property name="use-underline">True</property>
+                                        <property name="tooltip-text" translatable="yes">Restore the preset tab colors</property>
+                                      </object>
+                                      <packing>
+                                        <property name="padding">6</property>
+                                      </packing>
+                                    </child>
+                                  </object>
+                                  <packing>
+                                    <property name="left-attach">1</property>
+                                    <property name="top-attach">5</property>
                                   </packing>
                                 </child>
                               </object>

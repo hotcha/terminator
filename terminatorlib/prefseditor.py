@@ -32,6 +32,7 @@ def rgba2hex(widget):
     return get_color_string(widget.get_rgba().to_color())
 
 NUM_PALETTE_COLORS = 16
+NUM_TAB_COLORS = 7
 
 # FIXME: We need to check that we have represented all of Config() below
 class PrefsEditor:
@@ -370,6 +371,15 @@ class PrefsEditor:
         # homogeneous_tabbar
         widget = guiget('homogeneouscheck')
         widget.set_active(self.config['homogeneous_tabbar'])
+        # Tab colors
+        for tab_color_id in range(0, NUM_TAB_COLORS):
+            widget = guiget('tab_colorpicker_%d' % (tab_color_id + 1))
+            widget.connect('draw', self.on_tab_colorpicker_draw, tab_color_id)
+            def on_tab_color_click(_widget, _event, tab_color_id=tab_color_id):
+                self.edit_tab_color_button(tab_color_id)
+            widget.connect('button-press-event', on_tab_color_click)
+        guiget('tab_colors_reset_button').connect('clicked',
+                self.on_tab_colors_reset_clicked)
         # DBus Server
         widget = guiget('dbuscheck')
         widget.set_active(self.config['dbus'])
@@ -1327,6 +1337,68 @@ class PrefsEditor:
         finally:
             if dialog:
                 dialog.destroy()
+
+    def get_tab_colors(self):
+        """Return the configured tab colors, padded with the defaults."""
+        defaults = config.DEFAULTS['global_config']['tab_colors'].split(':')
+        colors = [c for c in self.config['tab_colors'].split(':') if c]
+        while len(colors) < NUM_TAB_COLORS:
+            colors.append(defaults[len(colors)])
+        return colors[:NUM_TAB_COLORS]
+
+    def on_tab_colorpicker_draw(self, widget, cr, tab_color_id):
+        width = widget.get_allocated_width()
+        height = widget.get_allocated_height()
+        cr.rectangle(0, 0, width, height)
+        cr.set_source_rgba(0.7, 0.7, 0.7, 1)
+        cr.fill()
+        cr.rectangle(1, 1, width-2, height-2)
+        col = Gdk.color_parse(self.get_tab_colors()[tab_color_id])
+        cr.set_source_rgba(col.red_float, col.green_float, col.blue_float)
+        cr.fill()
+
+    def replace_tab_color(self, tab_color_id, color):
+        """Replace the configured tab color for the given ID with the
+        given color."""
+        colors = self.get_tab_colors()
+        colors[tab_color_id] = get_color_string(color)
+        self.config['tab_colors'] = ':'.join(colors)
+        self.config.save()
+        self.builder.get_object(
+                'tab_colorpicker_%d' % (tab_color_id + 1)).queue_draw()
+
+    def edit_tab_color_button(self, tab_color_id):
+        """When a tab color picker is clicked, open a dialog to
+        configure a custom color."""
+        orig = Gdk.color_parse(self.get_tab_colors()[tab_color_id])
+
+        try:
+            # Create the dialog to choose a custom color
+            dialog = Gtk.ColorChooserDialog(_('Choose Tab Color'))
+            dialog.set_rgba(Gdk.RGBA.from_color(orig))
+
+            def on_color_set(_, color):
+                # The color is set, so save the config
+                self.replace_tab_color(tab_color_id,
+                                       dialog.get_rgba().to_color())
+            dialog.connect('notify::rgba', on_color_set)
+
+            # Show the dialog
+            res = dialog.run()
+            if res != Gtk.ResponseType.OK:
+                # User cancelled the color change, so reset to the original.
+                self.replace_tab_color(tab_color_id, orig)
+        finally:
+            if dialog:
+                dialog.destroy()
+
+    def on_tab_colors_reset_clicked(self, _widget):
+        """Restore the preset tab colors"""
+        self.config['tab_colors'] = config.DEFAULTS['global_config']['tab_colors']
+        self.config.save()
+        for tab_color_id in range(0, NUM_TAB_COLORS):
+            self.builder.get_object(
+                    'tab_colorpicker_%d' % (tab_color_id + 1)).queue_draw()
 
     def on_exit_action_combobox_changed(self, widget):
         """Exit action changed"""

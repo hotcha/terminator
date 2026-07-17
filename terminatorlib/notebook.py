@@ -16,6 +16,24 @@ from .editablelabel import EditableLabel
 from .translation import _
 from .util import err, dbg, enumerate_descendants, make_uuid
 
+TAB_CSS_INSTALLED = False
+
+def install_tab_css():
+    """Install screen-wide CSS rules needed for tab colouring"""
+    global TAB_CSS_INSTALLED
+    if TAB_CSS_INSTALLED:
+        return
+    css = '''
+notebook.terminator-notebook header tab { padding: 0px; }
+.terminator-tab-label { padding: 2px 6px; }
+'''
+    provider = Gtk.CssProvider()
+    provider.load_from_data(css.encode('utf-8'))
+    Gtk.StyleContext.add_provider_for_screen(
+            Gdk.Screen.get_default(), provider,
+            Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION + 100)
+    TAB_CSS_INSTALLED = True
+
 class Notebook(Container, Gtk.Notebook):
     """Class implementing a Gtk.Notebook container"""
     window = None
@@ -35,6 +53,8 @@ class Notebook(Container, Gtk.Notebook):
         self.window = window
         GObject.type_register(Notebook)
         self.register_signals(Notebook)
+        install_tab_css()
+        self.get_style_context().add_class('terminator-notebook')
         self.connect('switch-page', self.deferred_on_tab_switch)
         self.connect('scroll-event', self.on_scroll_event)
         self.connect('create-window', self.create_window_detach)
@@ -245,10 +265,13 @@ class Notebook(Container, Gtk.Notebook):
         label = self.get_tab_label(widget)
         if not label:
             dbg('unable to find label for widget: %s' % widget)
-        elif label.get_custom_label():
-            metadata['label'] = label.get_custom_label()
         else:
-            dbg('don\'t grab the label as it was not customised')
+            if label.get_custom_label():
+                metadata['label'] = label.get_custom_label()
+            else:
+                dbg('don\'t grab the label as it was not customised')
+            if label.tab_color:
+                metadata['color'] = label.tab_color
         return metadata
 
     def get_children(self):
@@ -315,6 +338,8 @@ class Notebook(Container, Gtk.Notebook):
         if metadata and 'label' in metadata:
             dbg('creating TabLabel with text: %s' % metadata['label'])
             label.set_custom_label(metadata['label'])
+        if metadata and metadata.get('color'):
+            label.set_tab_color(metadata['color'])
         label.connect('close-clicked', self.closetab)
 
         label.show_all()
@@ -341,6 +366,7 @@ class Notebook(Container, Gtk.Notebook):
 
         self.set_tab_reorderable(widget, True)
         self.set_current_page(tabpos)
+        self.update_tab_label_states()
         self.show_all()
         if maker.isinstance(term_widget, 'Terminal'):
             widget.grab_focus()
@@ -522,7 +548,16 @@ class Notebook(Container, Gtk.Notebook):
             # if we can't find a last active term we must be starting up
             if term is not None:
                 GObject.idle_add(term.ensure_visible_and_focussed)
+        self.update_tab_label_states()
         return True
+
+    def update_tab_label_states(self):
+        """Tell each tab label whether its tab is the active one"""
+        current = self.get_current_page()
+        for tabnum in range(0, self.get_n_pages()):
+            label = self.get_tab_label(self.get_nth_page(tabnum))
+            if label:
+                label.set_tab_active(tabnum == current)
 
     def on_scroll_event(self, notebook, event):
         '''Handle scroll events for scrolling through tabs'''
@@ -581,6 +616,10 @@ class TabLabel(Gtk.HBox):
     label = None
     icon = None
     button = None
+    tab_color = None
+    tab_active = False
+    css_provider = None
+    tab_popover = None
 
     __gsignals__ = {
             'close-clicked': (GObject.SignalFlags.RUN_LAST, None,
@@ -596,6 +635,7 @@ class TabLabel(Gtk.HBox):
         self.config = Config()
 
         self.connect("button-press-event", self.on_button_pressed)
+        self.get_style_context().add_class('terminator-tab-label')
 
         self.label = EditableLabel(title)
         self.update_angle()
@@ -604,6 +644,15 @@ class TabLabel(Gtk.HBox):
 
         self.update_button()
         self.show_all()
+
+    def do_draw(self, cr):
+        """Render our CSS background/frame before drawing the children"""
+        context = self.get_style_context()
+        width = self.get_allocated_width()
+        height = self.get_allocated_height()
+        Gtk.render_background(context, cr, 0, 0, width, height)
+        Gtk.render_frame(context, cr, 0, 0, width, height)
+        return Gtk.HBox.do_draw(self, cr)
 
     def set_label(self, text):
         """Update the text of our label"""
@@ -679,8 +728,209 @@ class TabLabel(Gtk.HBox):
         """The close button has been clicked. Destroy the tab"""
         self.emit('close-clicked', self)
 
+    def set_tab_color(self, color):
+        """Set the tab color (a '#rrggbb' string) or None to clear it"""
+        self.tab_color = color
+        self.apply_tab_color()
+
+    def set_tab_active(self, active):
+        """Set whether our tab is the active one and restyle accordingly"""
+        if active == self.tab_active:
+            return
+        self.tab_active = active
+        self.apply_tab_color()
+
+    def apply_tab_color(self):
+        """Apply CSS styling for our tab color, depending on active state"""
+        if self.css_provider is None:
+            self.css_provider = Gtk.CssProvider()
+            self.get_style_context().add_provider(
+                    self.css_provider,
+                    Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION + 200)
+        if not self.tab_color:
+            self.css_provider.load_from_data(b'')
+            self.queue_draw()
+            return
+        if self.tab_active:
+            # Active tab: fill the whole tab with the color; text color is
+            # inherited by the label and the close button
+            fg = fg_color_for(self.tab_color)
+            css = ('.terminator-tab-label { background-color: %s;'
+                   ' color: %s; }' % (self.tab_color, fg))
+        else:
+            # Inactive tab: just a colored frame inside the tab edges
+            css = ('.terminator-tab-label {'
+                   ' box-shadow: inset 0 0 0 2px %s; }' % self.tab_color)
+        self.css_provider.load_from_data(css.encode('utf-8'))
+        self.queue_draw()
+
+    def show_tab_menu(self, event):
+        """Pop up the tab context menu at the pointer"""
+        if self.tab_popover:
+            self.tab_popover.popdown()
+        popover = TabColorPopover(self)
+        popover.connect('closed', self.on_tab_popover_closed)
+        self.tab_popover = popover
+        rect = Gdk.Rectangle()
+        rect.x, rect.y = int(event.x), int(event.y)
+        rect.width, rect.height = 1, 1
+        popover.set_pointing_to(rect)
+        popover.show_all()
+        popover.popup()
+
+    def on_tab_popover_closed(self, popover):
+        """Drop our reference when the popover is dismissed"""
+        if self.tab_popover is popover:
+            self.tab_popover = None
+
     def on_button_pressed(self, _widget, event):
         if event.button == 2:
             self.on_close(_widget)
+        elif event.button == 3:
+            self.show_tab_menu(event)
+            return True
+
+def fg_color_for(bg_hex):
+    """Pick a readable foreground color for the given background color"""
+    rgba = Gdk.RGBA()
+    rgba.parse(bg_hex)
+    luminance = 0.299 * rgba.red + 0.587 * rgba.green + 0.114 * rgba.blue
+    if luminance > 0.55:
+        return '#1a1a1a'
+    return '#f2f2f2'
+
+def get_tab_colors(config):
+    """Return the configured list of tab colors, padded with defaults"""
+    from .config import DEFAULTS
+    defaults = DEFAULTS['global_config']['tab_colors'].split(':')
+    colors = [c for c in config['tab_colors'].split(':') if c]
+    while len(colors) < len(defaults):
+        colors.append(defaults[len(colors)])
+    return colors[:len(defaults)]
+
+class TabColorSwatch(Gtk.DrawingArea):
+    """A single color swatch in the tab color menu"""
+    SIZE = 20
+    INSET = 3
+
+    def __init__(self, color, selected, on_pick):
+        GObject.GObject.__init__(self)
+        self.color = color          # None means "no color"
+        self.selected = selected
+        self.hover = False
+        self.on_pick = on_pick
+        self.set_size_request(self.SIZE, self.SIZE)
+        if color is None:
+            self.set_tooltip_text(_('No color'))
+        else:
+            self.set_tooltip_text(color)
+        self.add_events(Gdk.EventMask.ENTER_NOTIFY_MASK |
+                        Gdk.EventMask.LEAVE_NOTIFY_MASK |
+                        Gdk.EventMask.BUTTON_PRESS_MASK)
+        self.connect('draw', self.on_draw)
+        self.connect('enter-notify-event', self.on_enter)
+        self.connect('leave-notify-event', self.on_leave)
+        self.connect('button-press-event', self.on_button_press)
+
+    def on_enter(self, _widget, _event):
+        self.hover = True
+        self.queue_draw()
+
+    def on_leave(self, _widget, _event):
+        self.hover = False
+        self.queue_draw()
+
+    def on_button_press(self, _widget, event):
+        if event.button == 1:
+            self.on_pick(self.color)
+            return True
+        return False
+
+    def on_draw(self, _widget, cr):
+        width = self.get_allocated_width()
+        height = self.get_allocated_height()
+        # Grow slightly on hover instead of moving pixels around
+        inset = 0 if self.hover else self.INSET
+
+        if self.color is None:
+            # "No color" swatch: neutral box with a diagonal slash
+            cr.rectangle(inset, inset, width - 2 * inset, height - 2 * inset)
+            cr.set_source_rgb(0.85, 0.85, 0.85)
+            cr.fill()
+            cr.set_source_rgb(0.45, 0.45, 0.45)
+            cr.set_line_width(1.4)
+            cr.move_to(inset + 1.5, height - inset - 1.5)
+            cr.line_to(width - inset - 1.5, inset + 1.5)
+            cr.stroke()
+        else:
+            rgba = Gdk.RGBA()
+            rgba.parse(self.color)
+            cr.rectangle(inset, inset, width - 2 * inset, height - 2 * inset)
+            cr.set_source_rgb(rgba.red, rgba.green, rgba.blue)
+            cr.fill()
+            # Thin outline so light colors stay visible on light themes
+            cr.rectangle(inset + 0.5, inset + 0.5,
+                         width - 2 * inset - 1, height - 2 * inset - 1)
+            cr.set_source_rgba(0, 0, 0, 0.25)
+            cr.set_line_width(1)
+            cr.stroke()
+            if self.selected:
+                fg = Gdk.RGBA()
+                fg.parse(fg_color_for(self.color))
+                cr.set_source_rgb(fg.red, fg.green, fg.blue)
+                cr.set_line_width(2.2)
+                cr.set_line_cap(1)      # cairo.LineCap.ROUND
+                cr.set_line_join(1)     # cairo.LineJoin.ROUND
+                cr.move_to(width * 0.24, height * 0.54)
+                cr.line_to(width * 0.44, height * 0.74)
+                cr.line_to(width * 0.78, height * 0.28)
+                cr.stroke()
+
+class TabColorPopover(Gtk.Popover):
+    """Tab context popup holding the close action and a horizontal row
+    of tab color swatches.
+
+    A Gtk.Popover is used instead of a Gtk.Menu because menus do not
+    deliver pointer events to child widgets inside their items, which
+    the interactive swatches need."""
+
+    def __init__(self, tablabel):
+        GObject.GObject.__init__(self, relative_to=tablabel)
+        self.tablabel = tablabel
+        self.set_position(Gtk.PositionType.BOTTOM)
+
+        vbox = Gtk.VBox(spacing=6)
+        vbox.set_border_width(6)
+
+        close = Gtk.Button(label=_('_Close Tab'), use_underline=True)
+        close.set_relief(Gtk.ReliefStyle.NONE)
+        close.set_halign(Gtk.Align.FILL)
+        close.get_child().set_xalign(0.0)
+        close.connect('clicked', self.on_close_clicked)
+        vbox.pack_start(close, False, False, 0)
+
+        vbox.pack_start(Gtk.Separator(), False, False, 0)
+
+        title = Gtk.Label(label=_('Tab color'))
+        title.set_halign(Gtk.Align.START)
+        vbox.pack_start(title, False, False, 0)
+
+        hbox = Gtk.HBox(spacing=4)
+        colors = [None] + get_tab_colors(tablabel.config)
+        for color in colors:
+            swatch = TabColorSwatch(color, color == tablabel.tab_color,
+                                    self.on_pick)
+            hbox.pack_start(swatch, False, False, 0)
+        vbox.pack_start(hbox, False, False, 0)
+
+        self.add(vbox)
+
+    def on_close_clicked(self, _button):
+        self.popdown()
+        self.tablabel.on_close(None)
+
+    def on_pick(self, color):
+        self.tablabel.set_tab_color(color)
+        self.popdown()
 
 # vim: set expandtab ts=4 sw=4:
