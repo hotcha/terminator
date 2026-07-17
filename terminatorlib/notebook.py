@@ -19,13 +19,21 @@ from .util import err, dbg, enumerate_descendants, make_uuid
 TAB_CSS_INSTALLED = False
 
 def install_tab_css():
-    """Install screen-wide CSS rules needed for tab colouring"""
+    """Install screen-wide CSS rules needed for tab colouring.
+
+    Some themes (e.g. Fluent) give the box and the close button inside a
+    tab negative margins that are calibrated to cancel the theme's own
+    paddings. Since we set our own paddings, we must reset the margins
+    to the same neutral baseline, otherwise the inherited negative
+    margins push the close button and our painted background/frame
+    outside the tab's edges."""
     global TAB_CSS_INSTALLED
     if TAB_CSS_INSTALLED:
         return
     css = '''
 notebook.terminator-notebook header tab { padding: 0px; }
-.terminator-tab-label { padding: 2px 6px; }
+.terminator-tab-label { margin: 0px; padding: 2px 6px; }
+.terminator-tab-label > button { margin: 0px; }
 '''
     provider = Gtk.CssProvider()
     provider.load_from_data(css.encode('utf-8'))
