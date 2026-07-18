@@ -4,6 +4,7 @@
 
 from functools import cmp_to_key
 from gi.repository import GObject
+from gi.repository import GLib
 from gi.repository import Gtk
 from gi.repository import Gdk
 from gi.repository import Gio
@@ -26,12 +27,18 @@ def install_tab_css():
     paddings. Since we set our own paddings, we must reset the margins
     to the same neutral baseline, otherwise the inherited negative
     margins push the close button and our painted background/frame
-    outside the tab's edges."""
+    outside the tab's edges. We also reset theme-supplied border-width,
+    border-image, and margin so that the colour fills the full tab width
+    without gaps on either side, and we reset padding and margin on the
+    internal GTK3 GtkBox (the ``box`` child node between ``tab`` and
+    ``TabLabel``) so that the ``TabLabel`` widget fills the entire
+    content area of the notebook tab."""
     global TAB_CSS_INSTALLED
     if TAB_CSS_INSTALLED:
         return
     css = '''
-notebook.terminator-notebook header tab { padding: 0px; }
+notebook.terminator-notebook header tab { padding: 0px; margin-left: 0px; margin-right: 0px; border-width: 0px; border-image: none; }
+notebook.terminator-notebook header tab box { padding: 0px; margin-left: 0px; margin-right: 0px; }
 .terminator-tab-label { margin: 0px; padding: 2px 6px; }
 .terminator-tab-label > button { margin: 0px; }
 '''
@@ -766,21 +773,27 @@ class TabLabel(Gtk.HBox):
             css = ('.terminator-tab-label { background-color: %s;'
                    ' color: %s; }' % (self.tab_color, fg))
         else:
-            # Inactive tab: just a colored frame inside the tab edges
+            # Inactive tab: subtle background tint + thin border
+            r = int(self.tab_color[1:3], 16)
+            g = int(self.tab_color[3:5], 16)
+            b = int(self.tab_color[5:7], 16)
             css = ('.terminator-tab-label {'
-                   ' box-shadow: inset 0 0 0 2px %s; }' % self.tab_color)
+                   ' background-color: rgba(%d, %d, %d, 0.1);'
+                   ' box-shadow: inset 0 0 0 1px %s; }'
+                   % (r, g, b, self.tab_color))
         self.css_provider.load_from_data(css.encode('utf-8'))
         self.queue_draw()
 
-    def show_tab_menu(self, event):
-        """Pop up the tab context menu at the pointer"""
+    def show_tab_menu(self, x, y):
+        """Pop up the tab context menu at the given coordinates,
+        relative to this tab label"""
         if self.tab_popover:
             self.tab_popover.popdown()
         popover = TabColorPopover(self)
         popover.connect('closed', self.on_tab_popover_closed)
         self.tab_popover = popover
         rect = Gdk.Rectangle()
-        rect.x, rect.y = int(event.x), int(event.y)
+        rect.x, rect.y = x, y
         rect.width, rect.height = 1, 1
         popover.set_pointing_to(rect)
         popover.show_all()
@@ -795,8 +808,27 @@ class TabLabel(Gtk.HBox):
         if event.button == 2:
             self.on_close(_widget)
         elif event.button == 3:
-            self.show_tab_menu(event)
+            self._activate_tab()
+            # Extract the coordinates now: the event struct is only valid
+            # for the duration of the signal emission, and the deferred
+            # callback runs after that.
+            # Show the menu only after the tab switch has fully settled.
+            # Switching pages schedules an idle grab_focus() on the terminal
+            # (see deferred_on_tab_switch/on_tab_switch), which dismisses any
+            # popover shown before it. PRIORITY_LOW puts this idle handler
+            # behind that focus transfer.
+            x, y = int(event.x), int(event.y)
+            GLib.idle_add(self.show_tab_menu, x, y,
+                          priority=GLib.PRIORITY_LOW)
             return True
+
+    def _activate_tab(self):
+        """Switch to the page this tab label belongs to, if any."""
+        nb = self.notebook
+        for i in range(nb.get_n_pages()):
+            if nb.get_tab_label(nb.get_nth_page(i)) == self:
+                nb.set_current_page(i)
+                return
 
 def fg_color_for(bg_hex):
     """Pick a readable foreground color for the given background color"""
@@ -895,8 +927,8 @@ class TabColorSwatch(Gtk.DrawingArea):
                 cr.stroke()
 
 class TabColorPopover(Gtk.Popover):
-    """Tab context popup holding the close action and a horizontal row
-    of tab color swatches.
+    """Tab context popup holding the move-to-new-window action and a
+    horizontal row of tab color swatches.
 
     A Gtk.Popover is used instead of a Gtk.Menu because menus do not
     deliver pointer events to child widgets inside their items, which
@@ -910,12 +942,13 @@ class TabColorPopover(Gtk.Popover):
         vbox = Gtk.VBox(spacing=6)
         vbox.set_border_width(6)
 
-        close = Gtk.Button(label=_('_Close Tab'), use_underline=True)
-        close.set_relief(Gtk.ReliefStyle.NONE)
-        close.set_halign(Gtk.Align.FILL)
-        close.get_child().set_xalign(0.0)
-        close.connect('clicked', self.on_close_clicked)
-        vbox.pack_start(close, False, False, 0)
+        move = Gtk.Button(label=_('_Move to New Window'), use_underline=True)
+        move.set_relief(Gtk.ReliefStyle.NONE)
+        move.get_style_context().add_class('flat')
+        move.set_halign(Gtk.Align.FILL)
+        move.get_child().set_xalign(0.0)
+        move.connect('clicked', self.on_move_to_new_window_clicked)
+        vbox.pack_start(move, False, False, 0)
 
         vbox.pack_start(Gtk.Separator(), False, False, 0)
 
@@ -933,9 +966,19 @@ class TabColorPopover(Gtk.Popover):
 
         self.add(vbox)
 
-    def on_close_clicked(self, _button):
+    def on_move_to_new_window_clicked(self, _button):
+        """Detach this tab into its own new window"""
         self.popdown()
-        self.tablabel.on_close(None)
+        tablabel = self.tablabel
+        nb = tablabel.notebook
+        for i in range(nb.get_n_pages()):
+            page = nb.get_nth_page(i)
+            if nb.get_tab_label(page) is tablabel:
+                # Use the pointer position as the drop point, like a drag
+                seat = Gdk.Display.get_default().get_default_seat()
+                _screen, x, y = seat.get_pointer().get_position()
+                nb.create_window_detach(nb, page, x, y)
+                return
 
     def on_pick(self, color):
         self.tablabel.set_tab_color(color)

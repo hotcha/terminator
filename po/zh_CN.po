@@ -1752,3 +1752,15 @@ msgstr "窗口组 %s"
 #, python-format
 msgid "Tab %d"
 msgstr "标签 %d"
+
+#: ../terminatorlib/notebook.py:864
+msgid "No color"
+msgstr "无颜色"
+
+#: ../terminatorlib/notebook.py:945
+msgid "_Move to New Window"
+msgstr "移动到新窗口(_M)"
+
+#: ../terminatorlib/notebook.py:955
+msgid "Tab color"
+msgstr "标签页颜色"
