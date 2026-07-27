@@ -186,6 +186,7 @@ class Foo(Borg):
 | `terminatorlib/plugin.py` | Plugin base classes, PluginRegistry, KeyBindUtil |
 | `terminatorlib/prefseditor.py` | Full preferences dialog (~2335 lines, loaded from `preferences.glade`) |
 | `terminatorlib/signalman.py` | Per-instance Gtk signal tracker |
+| `terminatorlib/timestamps.py` | Per-line last-modified timestamps — per-terminal tracker + right-edge cairo overlay (iTerm2-style, toggled via context menu) |
 | `terminatorlib/util.py` | Debug logging, UUID, widget tree walking, X11/Wayland/Flatpak detection |
 | `terminatorlib/version.py` | `APP_NAME='terminator'`, `APP_VERSION='2.1.5'` |
 | `remotinator` | CLI DBus client (uses `terminatorlib.ipc`) |

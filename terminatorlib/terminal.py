@@ -26,6 +26,7 @@ from .titlebar import Titlebar
 from .terminal_popup_menu import TerminalPopupMenu
 from .prefseditor import PrefsEditor
 from .searchbar import Searchbar
+from .timestamps import Timestamps
 from .translation import _
 from .signalman import Signalman
 from . import plugin
@@ -120,6 +121,7 @@ class Terminal(Gtk.VBox):
     composite_support = None
 
     cnxids = None
+    timestamps = None
     targets_for_new_group = None
 
     def __init__(self):
@@ -181,6 +183,8 @@ class Terminal(Gtk.VBox):
 
         self.searchbar = Searchbar()
         self.searchbar.connect('end-search', self.on_search_done)
+
+        self.timestamps = Timestamps(self)
 
         self.show()
         if self.config['title_at_bottom']:
@@ -269,6 +273,7 @@ class Terminal(Gtk.VBox):
     def close(self):
         """Close ourselves"""
         dbg('close: called')
+        self.timestamps.close()
         self.cnxids.remove_widget(self.vte)
         self.emit('close-term')
         if self.pid is not None:
@@ -1203,6 +1208,10 @@ class Terminal(Gtk.VBox):
     def do_scrollbar_toggle(self):
         """Show or hide the terminal scrollbar"""
         self.toggle_widget_visibility(self.scrollbar)
+
+    def do_timestamps_toggle(self):
+        """Show or hide per-line timestamps"""
+        self.timestamps.set_enabled(not self.timestamps.enabled)
 
     def toggle_widget_visibility(self, widget):
         """Show or hide a widget"""

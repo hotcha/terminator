@@ -1542,6 +1542,10 @@ msgstr ""
 msgid "Show _scrollbar"
 msgstr ""
 
+#: ../terminatorlib/terminal_popup_menu.py:279
+msgid "Show _timestamps"
+msgstr ""
+
 #: ../terminatorlib/terminal_popup_menu.py:248
 msgid "_Layouts..."
 msgstr ""

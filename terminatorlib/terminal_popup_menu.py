@@ -275,6 +275,12 @@ class TerminalPopupMenu(object):
         item.connect('toggled', lambda x: terminal.do_scrollbar_toggle())
         menu.append(item)
 
+        item = self.menu_item(Gtk.CheckMenuItem, 'toggle_timestamps',
+                                                   _('Show _timestamps'))
+        item.set_active(terminal.timestamps.enabled)
+        item.connect('toggled', lambda x: terminal.do_timestamps_toggle())
+        menu.append(item)
+
         if hasattr(Gtk, 'Builder'):  # VERIFY FOR GTK3: is this ever false?
             item = self.menu_item(Gtk.MenuItem, 'preferences',
                                                 _('_Preferences'))

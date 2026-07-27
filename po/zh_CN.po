@@ -1553,6 +1553,10 @@ msgstr "重新启动命令"
 msgid "Show _scrollbar"
 msgstr "显示滚动条"
 
+#: ../terminatorlib/terminal_popup_menu.py:279
+msgid "Show _timestamps"
+msgstr "显示时间戳"
+
 #: ../terminatorlib/terminal_popup_menu.py:248
 msgid "_Layouts..."
 msgstr "布局...(_L)"
