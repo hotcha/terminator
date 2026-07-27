@@ -216,7 +216,7 @@ class MouseFreeURLHandler(plugin.Plugin):
         self.vte.search_set_wrap_around(True)
         regex_flags_pcre2 = (regex.FLAGS_PCRE2 | regex.PCRE2_CASELESS)
         searchre = Vte.Regex.new_for_search(self.searchtext,
-                        len(self.searchtext), regex_flags_pcre2)
+                        -1, regex_flags_pcre2)
 
         self.vte.search_set_regex(searchre, 0)
 

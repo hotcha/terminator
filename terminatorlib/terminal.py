@@ -351,7 +351,7 @@ class Terminal(Gtk.VBox):
         match = -1
         if regex.FLAGS_PCRE2:
             try:
-                reg = Vte.Regex.new_for_match(re, len(re), self.regex_flags or regex.FLAGS_PCRE2)
+                reg = Vte.Regex.new_for_match(re, -1, self.regex_flags or regex.FLAGS_PCRE2)
                 match = self.vte.match_add_regex(reg, 0)
             except GLib.Error:
                 # happens when PCRE2 support is not builtin (Ubuntu < 19.10)
