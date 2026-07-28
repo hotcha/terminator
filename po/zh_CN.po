@@ -12,10 +12,11 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-07-27 22:51+0800\n"
+"POT-Creation-Date: 2026-07-28 11:19+0800\n"
 "PO-Revision-Date: 2026-07-27 19:50+0800\n"
 "Last-Translator: Mony Xie <monyxie@gmail.com>, 2023\n"
-"Language-Team: Chinese (China) (https://app.transifex.com/terminator/teams/109338/zh_CN/)\n"
+"Language-Team: Chinese (China) (https://app.transifex.com/terminator/teams/"
+"109338/zh_CN/)\n"
 "Language: zh_CN\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -129,7 +130,7 @@ msgstr "要设置的标签页名。"
 #: ../data/terminator.desktop.in.h:1 ../data/terminator.appdata.xml.in.h:1
 #: ../terminatorlib/plugins/activitywatch.py:83
 #: ../terminatorlib/plugins/activitywatch.py:162
-#: ../terminatorlib/preferences.glade.h:183
+#: ../terminatorlib/preferences.glade.h:184
 msgid "Terminator"
 msgstr "Terminator 终端终结者"
 
@@ -138,17 +139,30 @@ msgid "Multiple terminals in one window"
 msgstr "一个窗口中的多个终端"
 
 #: ../data/terminator.appdata.xml.in.h:3
-#: ../terminatorlib/preferences.glade.h:184
+#: ../terminatorlib/preferences.glade.h:185
 msgid "The robot future of terminals"
 msgstr "高级终端的未来"
 
 #: ../data/terminator.appdata.xml.in.h:4
-msgid "A power-user tool for arranging terminals. It is inspired by programs such as gnome-multi-term, quadkonsole, etc. in that the main focus is arranging terminals in grids (tabs is the most common default method, which Terminator also supports)."
-msgstr "一个用来管理终端的高级用户工具。灵感来自于 gnome-multi-term，quadkonsole 等程序。它的主要功能是用网格来管理终端窗口（但同时也支持标签页）。"
+msgid ""
+"A power-user tool for arranging terminals. It is inspired by programs such "
+"as gnome-multi-term, quadkonsole, etc. in that the main focus is arranging "
+"terminals in grids (tabs is the most common default method, which Terminator "
+"also supports)."
+msgstr ""
+"一个用来管理终端的高级用户工具。灵感来自于 gnome-multi-term，quadkonsole 等程"
+"序。它的主要功能是用网格来管理终端窗口（但同时也支持标签页）。"
 
 #: ../data/terminator.appdata.xml.in.h:5
-msgid "Much of the behavior of Terminator is based on GNOME Terminal, and we are adding more features from that as time goes by, but we also want to extend out in different directions with useful features for sysadmins and other users."
-msgstr "Terminator 的大部分行为都基于 GNOME Terminal，在此基础上我们还会将更多功能集成进来。但我们同时也希望向更多不同的方面扩展，从而给系统管理员和其他用户带来更多有用的特性。"
+msgid ""
+"Much of the behavior of Terminator is based on GNOME Terminal, and we are "
+"adding more features from that as time goes by, but we also want to extend "
+"out in different directions with useful features for sysadmins and other "
+"users."
+msgstr ""
+"Terminator 的大部分行为都基于 GNOME Terminal，在此基础上我们还会将更多功能集"
+"成进来。但我们同时也希望向更多不同的方面扩展，从而给系统管理员和其他用户带来"
+"更多有用的特性。"
 
 #: ../data/terminator.appdata.xml.in.h:6
 msgid "Some highlights:"
@@ -216,11 +230,15 @@ msgid "Do you really wish to close this terminal?"
 msgstr "确定要关闭此终端吗？"
 
 #: ../terminatorlib/container.py:181
-msgid "This window has several terminals open. Closing the window will also close all terminals within it."
+msgid ""
+"This window has several terminals open. Closing the window will also close "
+"all terminals within it."
 msgstr "此窗口已开启多个终端，关闭窗口将同时关闭已开启的终端。"
 
 #: ../terminatorlib/container.py:184
-msgid "This tab has several terminals open. Closing the tab will also close all terminals within it."
+msgid ""
+"This tab has several terminals open. Closing the tab will also close all "
+"terminals within it."
 msgstr "此标签页已开启多个终端，关闭标签页将同时关闭已开启的终端。"
 
 #. dialog GUI
@@ -241,7 +259,7 @@ msgid "Terminator Layout Launcher"
 msgstr "Terminator布局启动器"
 
 #: ../terminatorlib/layoutlauncher.glade.h:2
-#: ../terminatorlib/preferences.glade.h:170
+#: ../terminatorlib/preferences.glade.h:171
 msgid "Layout"
 msgstr "布局"
 
@@ -302,7 +320,9 @@ msgid "Specify a command to execute inside the terminal"
 msgstr "指定要在终端中执行的命令"
 
 #: ../terminatorlib/optionparse.py:70 ../terminatorlib/optionparse.py:78
-msgid "Use the rest of the command line as a command to execute inside the terminal, and its arguments"
+msgid ""
+"Use the rest of the command line as a command to execute inside the "
+"terminal, and its arguments"
 msgstr "将命令行剩下的部分当作命令(及其参数)在终端中执行"
 
 #: ../terminatorlib/optionparse.py:73
@@ -421,12 +441,12 @@ msgid "Enabled"
 msgstr "已启用"
 
 #: ../terminatorlib/plugins/custom_commands.py:300
-#: ../terminatorlib/preferences.glade.h:172
+#: ../terminatorlib/preferences.glade.h:173
 msgid "Name"
 msgstr "名称"
 
 #: ../terminatorlib/plugins/custom_commands.py:304
-#: ../terminatorlib/preferences.glade.h:126
+#: ../terminatorlib/preferences.glade.h:127
 msgid "Command"
 msgstr "命令"
 
@@ -890,377 +910,400 @@ msgid "Tabs scroll buttons"
 msgstr "标签滚动按钮"
 
 #: ../terminatorlib/preferences.glade.h:94
+msgid "Tab close button"
+msgstr "标签关闭按钮"
+
+#: ../terminatorlib/preferences.glade.h:95
 msgid "Title bar at bottom (Require restart)"
 msgstr "标题栏置于下方（需重启）"
 
-#: ../terminatorlib/preferences.glade.h:95
+#: ../terminatorlib/preferences.glade.h:96
 msgid "New tab after current tab"
 msgstr "在当前标签页之后打开新标签页"
 
-#: ../terminatorlib/preferences.glade.h:96
+#: ../terminatorlib/preferences.glade.h:97
 msgid "Tab colors:"
 msgstr "标签页颜色："
 
-#: ../terminatorlib/preferences.glade.h:97
+#: ../terminatorlib/preferences.glade.h:98
 msgid "Click to change this tab color"
 msgstr "点击更改此标签页颜色"
 
-#: ../terminatorlib/preferences.glade.h:98
+#: ../terminatorlib/preferences.glade.h:99
 msgid "_Reset"
 msgstr "重置(_R)"
 
-#: ../terminatorlib/preferences.glade.h:99
+#: ../terminatorlib/preferences.glade.h:100
 msgid "Restore the preset tab colors"
 msgstr "恢复预设标签页颜色"
 
-#: ../terminatorlib/preferences.glade.h:100
+#: ../terminatorlib/preferences.glade.h:101
 msgid "Global"
 msgstr "全局"
 
-#: ../terminatorlib/preferences.glade.h:101
+#: ../terminatorlib/preferences.glade.h:102
 msgid "Profile"
 msgstr "配置"
 
-#: ../terminatorlib/preferences.glade.h:102
+#: ../terminatorlib/preferences.glade.h:103
 msgid "_Use the system fixed width font"
 msgstr "使用系统的等宽字体(_U)"
 
-#: ../terminatorlib/preferences.glade.h:103
+#: ../terminatorlib/preferences.glade.h:104
 msgid "_Font:"
 msgstr "字体(_F)："
 
-#: ../terminatorlib/preferences.glade.h:104
+#: ../terminatorlib/preferences.glade.h:105
 msgid "Choose A Terminal Font"
 msgstr "选择终端字体"
 
-#: ../terminatorlib/preferences.glade.h:105
+#: ../terminatorlib/preferences.glade.h:106
 msgid "_Allow bold text"
 msgstr "允许粗体字(_A)"
 
-#: ../terminatorlib/preferences.glade.h:106
+#: ../terminatorlib/preferences.glade.h:107
 msgid "Show titlebar"
 msgstr "显示标题栏"
 
-#: ../terminatorlib/preferences.glade.h:107
+#: ../terminatorlib/preferences.glade.h:108
 msgid "Copy on selection"
 msgstr "选中则复制"
 
-#: ../terminatorlib/preferences.glade.h:108
+#: ../terminatorlib/preferences.glade.h:109
 msgid "Disable Ctrl+mousewheel zoom"
 msgstr "禁用 Ctrl + 滚轮缩放"
 
-#: ../terminatorlib/preferences.glade.h:109
+#: ../terminatorlib/preferences.glade.h:110
 msgid "Select-by-_word characters:"
 msgstr "视作单词组成部分的字符(_W)："
 
-#: ../terminatorlib/preferences.glade.h:110
+#: ../terminatorlib/preferences.glade.h:111
 msgid "<b>Cursor</b>"
 msgstr "<b>光标</b>"
 
-#: ../terminatorlib/preferences.glade.h:111
+#: ../terminatorlib/preferences.glade.h:112
 msgid "_Shape:"
 msgstr "形状(_S)"
 
-#: ../terminatorlib/preferences.glade.h:112
+#: ../terminatorlib/preferences.glade.h:113
 msgid "Blink"
 msgstr "闪烁"
 
-#: ../terminatorlib/preferences.glade.h:113
+#: ../terminatorlib/preferences.glade.h:114
 msgid "Use default colors"
 msgstr "使用默认配色"
 
-#: ../terminatorlib/preferences.glade.h:114
+#: ../terminatorlib/preferences.glade.h:115
 msgid "Foreground:"
 msgstr "前景色："
 
-#: ../terminatorlib/preferences.glade.h:115
+#: ../terminatorlib/preferences.glade.h:116
 #: ../terminatorlib/terminal_popup_menu.py:385
 msgid "Background:"
 msgstr "背景："
 
-#: ../terminatorlib/preferences.glade.h:116
+#: ../terminatorlib/preferences.glade.h:117
 msgid "<b>Terminal bell</b>"
 msgstr "<b>终端响铃</b>"
 
-#: ../terminatorlib/preferences.glade.h:117
+#: ../terminatorlib/preferences.glade.h:118
 msgid "Titlebar icon"
 msgstr "标题栏图标"
 
-#: ../terminatorlib/preferences.glade.h:118
+#: ../terminatorlib/preferences.glade.h:119
 msgid "Visual flash"
 msgstr "闪烁显示"
 
-#: ../terminatorlib/preferences.glade.h:119
+#: ../terminatorlib/preferences.glade.h:120
 msgid "Audible beep"
 msgstr "发出哔声"
 
-#: ../terminatorlib/preferences.glade.h:120
+#: ../terminatorlib/preferences.glade.h:121
 msgid "Window list flash"
 msgstr "闪烁窗口列表"
 
-#: ../terminatorlib/preferences.glade.h:121
+#: ../terminatorlib/preferences.glade.h:122
 msgid "General"
 msgstr "一般设定"
 
-#: ../terminatorlib/preferences.glade.h:122
+#: ../terminatorlib/preferences.glade.h:123
 msgid "_Run command as a login shell"
 msgstr "以登录 Shell 方式运行命令(_R)"
 
-#: ../terminatorlib/preferences.glade.h:123
+#: ../terminatorlib/preferences.glade.h:124
 msgid "Ru_n a custom command instead of my shell"
 msgstr "运行自定义命令而不是 Shell(_N)"
 
-#: ../terminatorlib/preferences.glade.h:124
+#: ../terminatorlib/preferences.glade.h:125
 msgid "Custom co_mmand:"
 msgstr "自定义命令(_M)："
 
-#: ../terminatorlib/preferences.glade.h:125
+#: ../terminatorlib/preferences.glade.h:126
 msgid "When command _exits:"
 msgstr "命令退出时(_E)："
 
-#: ../terminatorlib/preferences.glade.h:127
+#: ../terminatorlib/preferences.glade.h:128
 msgid "<b>Foreground and Background</b>"
 msgstr "<b>前景与背景</b>"
 
-#: ../terminatorlib/preferences.glade.h:128
+#: ../terminatorlib/preferences.glade.h:129
 msgid "_Use colors from system theme"
 msgstr "使用系统主题中的颜色(_U)"
 
-#: ../terminatorlib/preferences.glade.h:129
+#: ../terminatorlib/preferences.glade.h:130
 msgid "Built-in sche_mes:"
 msgstr "内置方案(_M)："
 
-#: ../terminatorlib/preferences.glade.h:130
+#: ../terminatorlib/preferences.glade.h:131
 msgid "_Foreground:"
 msgstr "前景色(_F)："
 
-#: ../terminatorlib/preferences.glade.h:131
+#: ../terminatorlib/preferences.glade.h:132
 msgid "_Background:"
 msgstr "背景色(_B)："
 
-#: ../terminatorlib/preferences.glade.h:132
+#: ../terminatorlib/preferences.glade.h:133
 msgid "<b>Palette</b>"
 msgstr "<b>调色板</b>"
 
-#: ../terminatorlib/preferences.glade.h:133
+#: ../terminatorlib/preferences.glade.h:134
 msgid "Built-in _schemes:"
 msgstr "内置方案(_S)："
 
-#: ../terminatorlib/preferences.glade.h:134
+#: ../terminatorlib/preferences.glade.h:135
 msgid "Color p_alette:"
 msgstr "调色板(_A)："
 
-#: ../terminatorlib/preferences.glade.h:135
+#: ../terminatorlib/preferences.glade.h:136
 msgid "Show b_old text in bright colors"
 msgstr "用明亮色显示粗体文字(_O)"
 
-#: ../terminatorlib/preferences.glade.h:136
+#: ../terminatorlib/preferences.glade.h:137
 msgid "Colors"
 msgstr "色彩"
 
-#: ../terminatorlib/preferences.glade.h:137
+#: ../terminatorlib/preferences.glade.h:138
 msgid "_Solid color"
 msgstr "纯色(_S)"
 
-#: ../terminatorlib/preferences.glade.h:138
+#: ../terminatorlib/preferences.glade.h:139
 msgid "_Transparent background"
 msgstr "透明背景(_T)"
 
-#: ../terminatorlib/preferences.glade.h:139
+#: ../terminatorlib/preferences.glade.h:140
 msgid "Background Image"
 msgstr "背景图片"
 
-#: ../terminatorlib/preferences.glade.h:140
+#: ../terminatorlib/preferences.glade.h:141
 msgid "Image File:"
 msgstr "图片文件："
 
-#: ../terminatorlib/preferences.glade.h:141
+#: ../terminatorlib/preferences.glade.h:142
 msgid "Choose file"
 msgstr "选择文件"
 
-#: ../terminatorlib/preferences.glade.h:142
+#: ../terminatorlib/preferences.glade.h:143
 msgid "Drawing mode:"
 msgstr "绘制模式："
 
-#: ../terminatorlib/preferences.glade.h:143
+#: ../terminatorlib/preferences.glade.h:144
 msgid "Horizontal alignment:"
 msgstr "水平对齐："
 
-#: ../terminatorlib/preferences.glade.h:144
+#: ../terminatorlib/preferences.glade.h:145
 msgid "Vertical alignment:"
 msgstr "垂直对齐："
 
-#: ../terminatorlib/preferences.glade.h:145
+#: ../terminatorlib/preferences.glade.h:146
 msgid "S_hade background:"
 msgstr "背景着色(_H)："
 
-#: ../terminatorlib/preferences.glade.h:146
+#: ../terminatorlib/preferences.glade.h:147
 msgid "<small><i>None</i></small>"
 msgstr "<small><i>无</i></small>"
 
-#: ../terminatorlib/preferences.glade.h:147
+#: ../terminatorlib/preferences.glade.h:148
 msgid "<small><i>Maximum</i></small>"
 msgstr "<small><i>最大</i></small>"
 
-#: ../terminatorlib/preferences.glade.h:148
+#: ../terminatorlib/preferences.glade.h:149
 msgid "Blur background (KDE)"
 msgstr "模糊背景（KDE）"
 
-#: ../terminatorlib/preferences.glade.h:149
+#: ../terminatorlib/preferences.glade.h:150
 msgid "Background"
 msgstr "背景"
 
-#: ../terminatorlib/preferences.glade.h:150
+#: ../terminatorlib/preferences.glade.h:151
 msgid "_Scrollbar is:"
 msgstr "滚动条(_S)："
 
-#: ../terminatorlib/preferences.glade.h:151
+#: ../terminatorlib/preferences.glade.h:152
 msgid "Scroll on _output"
 msgstr "输出时滚动(_O)"
 
-#: ../terminatorlib/preferences.glade.h:152
+#: ../terminatorlib/preferences.glade.h:153
 msgid "Scroll on _keystroke"
 msgstr "击键时滚动(_K)"
 
-#: ../terminatorlib/preferences.glade.h:153
+#: ../terminatorlib/preferences.glade.h:154
 msgid "Infinite Scrollback"
 msgstr "无限回滚"
 
-#: ../terminatorlib/preferences.glade.h:154
+#: ../terminatorlib/preferences.glade.h:155
 msgid "Scroll_back:"
 msgstr "回滚(_B)："
 
-#: ../terminatorlib/preferences.glade.h:155
+#: ../terminatorlib/preferences.glade.h:156
 msgid "lines"
 msgstr "行"
 
-#: ../terminatorlib/preferences.glade.h:156
+#: ../terminatorlib/preferences.glade.h:157
 msgid "Scrolling"
 msgstr "滚动"
 
-#: ../terminatorlib/preferences.glade.h:157
-msgid "<small><i><b>Note:</b> These options may cause some applications to behave incorrectly.  They are only here to allow you to work around certain applications and operating systems that expect different terminal behavior.</i></small>"
-msgstr "<small><i><b>注意：</b>这些选项可能造成一些应用程序产生不正确的行为。仅用于允许您在一些应用程序和操作系统中作调整以获得不同的终端行为。</i></small>"
-
 #: ../terminatorlib/preferences.glade.h:158
+msgid ""
+"<small><i><b>Note:</b> These options may cause some applications to behave "
+"incorrectly.  They are only here to allow you to work around certain "
+"applications and operating systems that expect different terminal behavior.</"
+"i></small>"
+msgstr ""
+"<small><i><b>注意：</b>这些选项可能造成一些应用程序产生不正确的行为。仅用于允"
+"许您在一些应用程序和操作系统中作调整以获得不同的终端行为。</i></small>"
+
+#: ../terminatorlib/preferences.glade.h:159
 msgid "_Backspace key generates:"
 msgstr "按 _Backspace 键产生："
 
-#: ../terminatorlib/preferences.glade.h:159
+#: ../terminatorlib/preferences.glade.h:160
 msgid "_Delete key generates:"
 msgstr "按 _Delete 键产生："
 
-#: ../terminatorlib/preferences.glade.h:160
+#: ../terminatorlib/preferences.glade.h:161
 msgid "_Reset Compatibility Options to Defaults"
 msgstr "重置兼容性选项为默认值(_R)"
 
-#: ../terminatorlib/preferences.glade.h:161
+#: ../terminatorlib/preferences.glade.h:162
 msgid "Compatibility"
 msgstr "兼容性"
 
-#: ../terminatorlib/preferences.glade.h:162
+#: ../terminatorlib/preferences.glade.h:163
 msgid "Focused"
 msgstr "聚焦的"
 
-#: ../terminatorlib/preferences.glade.h:163
+#: ../terminatorlib/preferences.glade.h:164
 msgid "Inactive"
 msgstr "非活动"
 
-#: ../terminatorlib/preferences.glade.h:164
+#: ../terminatorlib/preferences.glade.h:165
 msgid "Receiving"
 msgstr "接收中"
 
-#: ../terminatorlib/preferences.glade.h:165
+#: ../terminatorlib/preferences.glade.h:166
 msgid "Hide size from title"
 msgstr "在标题中隐藏大小"
 
-#: ../terminatorlib/preferences.glade.h:166
+#: ../terminatorlib/preferences.glade.h:167
 msgid "_Use the system font"
 msgstr "使用系统字体(_U)"
 
-#: ../terminatorlib/preferences.glade.h:167
+#: ../terminatorlib/preferences.glade.h:168
 msgid "Choose A Titlebar Font"
 msgstr "选择标题栏字体"
 
-#: ../terminatorlib/preferences.glade.h:168
+#: ../terminatorlib/preferences.glade.h:169
 msgid "Titlebar"
 msgstr "标题栏"
 
-#: ../terminatorlib/preferences.glade.h:169
+#: ../terminatorlib/preferences.glade.h:170
 #: ../terminatorlib/terminal_popup_menu.py:327
 msgid "Profiles"
 msgstr "配置"
 
-#: ../terminatorlib/preferences.glade.h:171
+#: ../terminatorlib/preferences.glade.h:172
 msgid "Type"
 msgstr "类型"
 
-#: ../terminatorlib/preferences.glade.h:173
+#: ../terminatorlib/preferences.glade.h:174
 msgid "Profile:"
 msgstr "配置："
 
-#: ../terminatorlib/preferences.glade.h:174
+#: ../terminatorlib/preferences.glade.h:175
 msgid "Custom command:"
 msgstr "自定义命令："
 
-#: ../terminatorlib/preferences.glade.h:175
+#: ../terminatorlib/preferences.glade.h:176
 msgid "Working directory:"
 msgstr "工作目录:"
 
-#: ../terminatorlib/preferences.glade.h:176
+#: ../terminatorlib/preferences.glade.h:177
 msgid "Layouts"
 msgstr "布局"
 
-#: ../terminatorlib/preferences.glade.h:177
+#: ../terminatorlib/preferences.glade.h:178
 msgid "Action"
 msgstr "动作"
 
-#: ../terminatorlib/preferences.glade.h:178
+#: ../terminatorlib/preferences.glade.h:179
 msgid "Keybinding"
 msgstr "键绑定"
 
-#: ../terminatorlib/preferences.glade.h:179
+#: ../terminatorlib/preferences.glade.h:180
 msgid "Keybindings"
 msgstr "快捷键"
 
-#: ../terminatorlib/preferences.glade.h:180
+#: ../terminatorlib/preferences.glade.h:181
 msgid "Plugin"
 msgstr "插件"
 
-#: ../terminatorlib/preferences.glade.h:181
+#: ../terminatorlib/preferences.glade.h:182
 msgid "This plugin has no configuration options"
 msgstr "此插件没有配置项"
 
-#: ../terminatorlib/preferences.glade.h:182
+#: ../terminatorlib/preferences.glade.h:183
 msgid "Plugins"
 msgstr "插件"
 
-#: ../terminatorlib/preferences.glade.h:185
+#: ../terminatorlib/preferences.glade.h:186
 msgid "Version: 2.1.5"
 msgstr "版本：2.1.5"
 
-#: ../terminatorlib/preferences.glade.h:186
+#: ../terminatorlib/preferences.glade.h:187
 msgid ""
-"The goal of this project is to produce a useful tool for arranging terminals. It is inspired by programs such as gnome-multi-term, quadkonsole, etc. in that the main focus is arranging terminals in grids (tabs is the most common default method, which Terminator also supports).\n"
+"The goal of this project is to produce a useful tool for arranging "
+"terminals. It is inspired by programs such as gnome-multi-term, quadkonsole, "
+"etc. in that the main focus is arranging terminals in grids (tabs is the "
+"most common default method, which Terminator also supports).\n"
 "\n"
-"Much of the behavior of Terminator is based on GNOME Terminal, and we are adding more features from that as time goes by, but we also want to extend out in different directions with useful features for sysadmins and other users. If you have any suggestions, please file wishlist bugs! (see left for the Development link)"
+"Much of the behavior of Terminator is based on GNOME Terminal, and we are "
+"adding more features from that as time goes by, but we also want to extend "
+"out in different directions with useful features for sysadmins and other "
+"users. If you have any suggestions, please file wishlist bugs! (see left for "
+"the Development link)"
 msgstr ""
-"一个用来管理终端的高级用户工具。它的灵感来自于gnome-multi-term，quadkonsole等程序。它致力于用格子来管理终端（最普遍的方法是用标签页，Terminator也支持）。\n"
-"Terminator的大部分行为基于GNOME Terminal，我们还在从中集成更多特性。但我们同时也希望向扩展更多不同方面的实用特性从而服务于系统管理员和其他用户。如果你有任何建议，请向wishlist中提交！（看左边的开发者链接）"
+"一个用来管理终端的高级用户工具。它的灵感来自于gnome-multi-term，quadkonsole等"
+"程序。它致力于用格子来管理终端（最普遍的方法是用标签页，Terminator也支"
+"持）。\n"
+"Terminator的大部分行为基于GNOME Terminal，我们还在从中集成更多特性。但我们同"
+"时也希望向扩展更多不同方面的实用特性从而服务于系统管理员和其他用户。如果你有"
+"任何建议，请向wishlist中提交！（看左边的开发者链接）"
 
-#: ../terminatorlib/preferences.glade.h:189
+#: ../terminatorlib/preferences.glade.h:190
 msgid "The Manual"
 msgstr "手册"
 
-#: ../terminatorlib/preferences.glade.h:190
+#: ../terminatorlib/preferences.glade.h:191
 msgid ""
 "<a href=\"https://github.com/gnome-terminator/terminator\">Development</a>\n"
-"<a href=\"https://github.com/gnome-terminator/terminator/issues\">Bugs / Enhancements</a>"
+"<a href=\"https://github.com/gnome-terminator/terminator/issues\">Bugs / "
+"Enhancements</a>"
 msgstr ""
 "<a href=\"https://github.com/gnome-terminator/terminator\">开发</a>\n"
-"<a href=\"https://github.com/gnome-terminator/terminator/issues\">提交 Bug 或改进意见</a>"
+"<a href=\"https://github.com/gnome-terminator/terminator/issues\">提交 Bug 或"
+"改进意见</a>"
 
-#: ../terminatorlib/preferences.glade.h:192
+#: ../terminatorlib/preferences.glade.h:193
 msgid "About"
 msgstr "关于"
 
@@ -1593,26 +1636,41 @@ msgid "Open the manual"
 msgstr "打开手册"
 
 #. Create the dialog to choose a custom color
-#: ../terminatorlib/prefseditor.py:1377
+#: ../terminatorlib/prefseditor.py:1385
 msgid "Choose Tab Color"
 msgstr "选择标签页颜色"
 
-#: ../terminatorlib/prefseditor.py:1660
+#: ../terminatorlib/prefseditor.py:1668
 msgid "New Profile"
 msgstr "新配置"
 
-#: ../terminatorlib/prefseditor.py:1703 ../terminatorlib/prefseditor.py:1708
+#: ../terminatorlib/prefseditor.py:1711 ../terminatorlib/prefseditor.py:1716
 msgid "New Layout"
 msgstr "新布局"
 
-#. Label
-#: ../terminatorlib/searchbar.py:109
-msgid "Search:"
-msgstr "搜索："
+#: ../terminatorlib/searchbar.py:126
+msgid "Search mode"
+msgstr "搜索模式"
 
-#: ../terminatorlib/searchbar.py:123
+#: ../terminatorlib/searchbar.py:165
 msgid "Close Search bar"
 msgstr "关闭搜索栏"
+
+#: ../terminatorlib/searchbar.py:173
+msgid "Next match"
+msgstr "下一个匹配"
+
+#: ../terminatorlib/searchbar.py:182
+msgid "Previous match"
+msgstr "上一个匹配"
+
+#: ../terminatorlib/searchbar.py:261
+msgid "Smart Case Substring"
+msgstr "智能大小写子串"
+
+#: ../terminatorlib/searchbar.py:262
+msgid "Case-Sensitive Substring"
+msgstr "区分大小写子串"
 
 #: ../terminatorlib/terminal_popup_menu.py:116
 msgid "_Send email to..."
@@ -1929,3 +1987,12 @@ msgstr "窗口组 %s"
 #, python-format
 msgid "Tab %d"
 msgstr "标签 %d"
+
+#~ msgid "Tab is pinned"
+#~ msgstr "标签页已固定"
+
+#~ msgid "_Unpin Tab"
+#~ msgstr "取消固定(_U)"
+
+#~ msgid "_Pin Tab"
+#~ msgstr "固定(_P)"
