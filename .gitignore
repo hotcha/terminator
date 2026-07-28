@@ -26,3 +26,4 @@ terminatorlib/meliae
 .intltool*
 data/terminator.appdata.xml
 data/terminator.desktop
+data/terminator.metainfo.xml

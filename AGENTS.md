@@ -96,6 +96,14 @@ python setup.py install --single-version-externally-managed --record=install_fil
 # Uninstall
 python setup.py uninstall --manifest=install_files.txt
 
+# After a manual install, refresh the GTK icon caches — setup.py copies icons
+# but does NOT run gtk-update-icon-cache. With a stale hicolor cache, GTK trusts
+# the cache and skips directory scanning, so titlebar icons loaded by name
+# (terminator_active_broadcast_*, terminator_horiz/vert, terminal-bell) render
+# as broken-image placeholders. Distro packages do this automatically in postinst.
+sudo gtk-update-icon-cache /usr/share/icons/hicolor
+sudo gtk-update-icon-cache /usr/share/icons/HighContrast
+
 # Run tests (requires GTK runtime + xvfb)
 xvfb-run -a pytest-3
 
