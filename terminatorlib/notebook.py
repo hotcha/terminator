@@ -32,14 +32,19 @@ def install_tab_css():
     without gaps on either side, and we reset padding and margin on the
     internal GTK3 GtkBox (the ``box`` child node between ``tab`` and
     ``TabLabel``) so that the ``TabLabel`` widget fills the entire
-    content area of the notebook tab."""
+    content area of the notebook tab. Finally it suppresses the theme's
+    own tab backgrounds entirely (including the checked/active one):
+    every tab state is painted by TabLabel.apply_tab_color() on the
+    label itself — the theme only provides the tab bar ("container")
+    background behind it, so there is exactly one painted layer per tab.
+    """
     global TAB_CSS_INSTALLED
     if TAB_CSS_INSTALLED:
         return
     css = '''
-notebook.terminator-notebook header tab { padding: 0px; margin-left: 0px; margin-right: 0px; border-width: 0px; border-image: none; }
+notebook.terminator-notebook header tab { padding: 0px; margin-left: 0px; margin-right: 0px; border-width: 0px; border-image: none; background-color: transparent; background-image: none; box-shadow: none; }
 notebook.terminator-notebook header tab box { padding: 0px; margin-left: 0px; margin-right: 0px; }
-.terminator-tab-label { margin: 0px; padding: 2px 6px; }
+.terminator-tab-label { margin: 0px; padding: 1px 8px; }
 .terminator-tab-label > button { margin: 0px; }
 '''
     provider = Gtk.CssProvider()
@@ -73,6 +78,8 @@ class Notebook(Container, Gtk.Notebook):
         self.connect('switch-page', self.deferred_on_tab_switch)
         self.connect('scroll-event', self.on_scroll_event)
         self.connect('create-window', self.create_window_detach)
+        self.connect('page-added', self._on_page_count_changed)
+        self.connect('page-removed', self._on_page_count_changed)
         self.configure()
 
         self.set_can_focus(False)
@@ -106,6 +113,7 @@ class Notebook(Container, Gtk.Notebook):
         for tab in range(0, self.get_n_pages()):
             label = self.get_tab_label(self.get_nth_page(tab))
             label.update_angle()
+            label.update_button()
 
 #        style = Gtk.RcStyle()  # FIXME FOR GTK3 how to do it there? actually do we really want to override the theme?
 #        style.xthickness = 0
@@ -566,6 +574,10 @@ class Notebook(Container, Gtk.Notebook):
         self.update_tab_label_states()
         return True
 
+    def _on_page_count_changed(self, *_args):
+        """A tab was added or removed; recompute the separators"""
+        self._update_tab_separators()
+
     def update_tab_label_states(self):
         """Tell each tab label whether its tab is the active one"""
         current = self.get_current_page()
@@ -573,6 +585,21 @@ class Notebook(Container, Gtk.Notebook):
             label = self.get_tab_label(self.get_nth_page(tabnum))
             if label:
                 label.set_tab_active(tabnum == current)
+        self._update_tab_separators()
+
+    def _update_tab_separators(self):
+        """Show a '|' separator only between two plain inactive tabs"""
+        labels = []
+        for tabnum in range(0, self.get_n_pages()):
+            label = self.get_tab_label(self.get_nth_page(tabnum))
+            if label:
+                labels.append(label)
+        for i, label in enumerate(labels):
+            plain = not label.tab_active and not label.tab_color
+            next_plain = (i + 1 < len(labels)
+                          and not labels[i + 1].tab_active
+                          and not labels[i + 1].tab_color)
+            label.set_tab_separator(plain and next_plain)
 
     def on_scroll_event(self, notebook, event):
         '''Handle scroll events for scrolling through tabs'''
@@ -633,6 +660,7 @@ class TabLabel(Gtk.HBox):
     button = None
     tab_color = None
     tab_active = False
+    tab_separator = False
     css_provider = None
     tab_popover = None
 
@@ -703,11 +731,13 @@ class TabLabel(Gtk.HBox):
                 self.icon = None
             return
 
-        if not self.button:
-            self.button = Gtk.Button()
-        if not self.icon:
-            self.icon = Gio.ThemedIcon.new_with_default_fallbacks("window-close-symbolic")
-            self.icon = Gtk.Image.new_from_gicon(self.icon, Gtk.IconSize.MENU)
+        if self.button:
+            # close button already in place, nothing to do
+            return
+
+        self.button = Gtk.Button()
+        self.icon = Gio.ThemedIcon.new_with_default_fallbacks("window-close-symbolic")
+        self.icon = Gtk.Image.new_from_gicon(self.icon, Gtk.IconSize.MENU)
 
         self.button.set_focus_on_click(False)
         self.button.set_relief(Gtk.ReliefStyle.NONE)
@@ -747,6 +777,9 @@ class TabLabel(Gtk.HBox):
         """Set the tab color (a '#rrggbb' string) or None to clear it"""
         self.tab_color = color
         self.apply_tab_color()
+        # colouring a tab also changes the separators around it
+        if hasattr(self.notebook, '_update_tab_separators'):
+            self.notebook._update_tab_separators()
 
     def set_tab_active(self, active):
         """Set whether our tab is the active one and restyle accordingly"""
@@ -755,32 +788,55 @@ class TabLabel(Gtk.HBox):
         self.tab_active = active
         self.apply_tab_color()
 
+    def set_tab_separator(self, show):
+        """Set whether to draw a '|' separator at our right edge"""
+        if show == self.tab_separator:
+            return
+        self.tab_separator = show
+        self.apply_tab_color()
+
     def apply_tab_color(self):
-        """Apply CSS styling for our tab color, depending on active state"""
+        """Apply CSS styling based on colour, active state and separator"""
         if self.css_provider is None:
             self.css_provider = Gtk.CssProvider()
             self.get_style_context().add_provider(
                     self.css_provider,
                     Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION + 200)
-        if not self.tab_color:
-            self.css_provider.load_from_data(b'')
-            self.queue_draw()
-            return
-        if self.tab_active:
-            # Active tab: fill the whole tab with the color; text color is
-            # inherited by the label and the close button
+        if self.tab_color and self.tab_active:
+            # Coloured active tab: solid colour pill + white border
+            # ('rounded-full bg-yellow border-2 border-white');
+            # text colour is inherited by the label and the close button
             fg = fg_color_for(self.tab_color)
             css = ('.terminator-tab-label { background-color: %s;'
-                   ' color: %s; }' % (self.tab_color, fg))
-        else:
-            # Inactive tab: subtle background tint + thin border
+                   ' color: %s;'
+                   ' border: 2px solid #ffffff;'
+                   ' border-radius: 999px; }' % (self.tab_color, fg))
+        elif self.tab_color:
+            # Coloured inactive tab: 2px border in the tab's colour plus
+            # a soft inward glow ('rounded-full border-2 border-yellow
+            # shadow-inner shadow-yellow/25')
             r = int(self.tab_color[1:3], 16)
             g = int(self.tab_color[3:5], 16)
             b = int(self.tab_color[5:7], 16)
             css = ('.terminator-tab-label {'
-                   ' background-color: rgba(%d, %d, %d, 0.1);'
-                   ' box-shadow: inset 0 0 0 1px %s; }'
-                   % (r, g, b, self.tab_color))
+                   ' box-shadow: inset 0 0 5px 0 rgba(%d, %d, %d, 0.25);'
+                   ' border: 2px solid %s;'
+                   ' border-radius: 999px; }' % (r, g, b, self.tab_color))
+        elif self.tab_active:
+            # Uncoloured active tab: plain filled pill, no border
+            # ('rounded-full bg-white')
+            css = ('.terminator-tab-label {'
+                   ' background-color: @theme_base_color;'
+                   ' border-radius: 999px; }')
+        elif self.tab_separator:
+            # Plain inactive tab followed by another one: "|" separator,
+            # inset a little from the top and bottom edges
+            css = ('.terminator-tab-label {'
+                   ' margin-top: 4px; margin-bottom: 4px;'
+                   ' border-right: 1px solid alpha(@theme_fg_color, 0.25); }')
+        else:
+            # Everything else keeps the theme's own look
+            css = ''
         self.css_provider.load_from_data(css.encode('utf-8'))
         self.queue_draw()
 

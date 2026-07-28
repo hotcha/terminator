@@ -371,6 +371,9 @@ class PrefsEditor:
         # homogeneous_tabbar
         widget = guiget('homogeneouscheck')
         widget.set_active(self.config['homogeneous_tabbar'])
+        # close_button_on_tab
+        widget = guiget('closebuttoncheck')
+        widget.set_active(self.config['close_button_on_tab'])
         # Tab colors
         for tab_color_id in range(0, NUM_TAB_COLORS):
             widget = guiget('tab_colorpicker_%d' % (tab_color_id + 1))
@@ -895,6 +898,11 @@ class PrefsEditor:
     def on_scroll_toggled(self, widget):
         """scroll_tabbar setting changed"""
         self.config['scroll_tabbar'] = widget.get_active()
+        self.config.save()
+
+    def on_close_button_toggled(self, widget):
+        """close_button_on_tab setting changed"""
+        self.config['close_button_on_tab'] = widget.get_active()
         self.config.save()
 
     def on_dbuscheck_toggled(self, widget):
