@@ -2064,10 +2064,14 @@ class PrefsEditor:
             )
             keyval_lower, keyval_upper = Gdk.keyval_convert_case(key)
 
-            # Remove the Shift modifier from `mods` if a new key binding doesn't
-            # contain a letter and its key value (`key`) can't be modified by a
-            # Shift key.
-            if key_with_shift.level != 0 and keyval_lower == keyval_upper:
+            # Remove the Shift modifier from `mods` if pressing Shift makes
+            # the key produce a *different* symbol (e.g. `Ctrl+Shift+[` is
+            # really `Ctrl+{`), and the key has no letter case. Keys that
+            # merely have a multi-level xkb definition but yield the same
+            # symbol with Shift (e.g. F1) keep the Shift modifier.
+            if (key_with_shift.level != 0
+                    and key_with_shift.keyval != key
+                    and keyval_lower == keyval_upper):
                 mods = Gdk.ModifierType(mods & ~Gdk.ModifierType.SHIFT_MASK)
                 key = key_with_shift.keyval
 
