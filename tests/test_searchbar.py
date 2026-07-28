@@ -49,12 +49,8 @@ def make_terminal(lines, width=80, height=10):
 def make_searchbar(vte):
     searchbar = Searchbar()
     searchbar.vte = vte
-    # force a deterministic state regardless of the user's config,
-    # without triggering the toggled handlers (they would save config)
-    searchbar.match_case.handler_block_by_func(searchbar.match_case_toggled)
-    searchbar.match_case.set_active(False)
-    searchbar.invert_search.handler_block_by_func(searchbar.wrap_invert_search)
-    searchbar.invert_search.set_active(False)
+    # force a deterministic state regardless of the user's config
+    searchbar.search_mode = 'smart'
     searchbar.search_is_inverted = False
     return searchbar
 
@@ -145,10 +141,78 @@ def test_cjk_match_spans_full_characters():
     window.destroy()
 
 
-def test_case_insensitive_by_default():
+def test_smart_case_lowercase_is_insensitive():
+    """Smart case (default): an all-lowercase query ignores case"""
     window, vte = make_terminal(["foo Needle bar"])
     searchbar = make_searchbar(vte)
     search(searchbar, "needle")
+    assert searchbar._row_spans(0) == [(4, 10)]
+    window.destroy()
+
+
+def test_smart_case_uppercase_is_sensitive():
+    """Smart case: any uppercase letter in the query forces strict matching"""
+    window, vte = make_terminal(["foo Needle bar needle"])
+    searchbar = make_searchbar(vte)
+    search(searchbar, "Needle")
+    assert searchbar._row_spans(0) == [(4, 10)]
+    window.destroy()
+
+
+def test_sensitive_mode_is_always_strict():
+    """Case-Sensitive mode: even an all-lowercase query is strict"""
+    window, vte = make_terminal(["foo Needle bar needle"])
+    searchbar = make_searchbar(vte)
+    searchbar.search_mode = 'sensitive'
+    search(searchbar, "needle")
+    assert searchbar._row_spans(0) == [(15, 21)]
+    window.destroy()
+
+
+class StubRadioItem:
+    """Stand-in for a Gtk.RadioMenuItem in the active state"""
+    def get_active(self):
+        return True
+
+
+def test_mode_switch_searches_again():
+    """Selecting a different mode from the dropdown re-runs the search"""
+    window, vte = make_terminal(["foo Needle bar needle"])
+    searchbar = make_searchbar(vte)
+    search(searchbar, "needle")
+    assert searchbar._row_spans(0) == [(4, 10), (15, 21)]
+    searchbar._on_mode_toggled(StubRadioItem(), 'sensitive')
+    assert searchbar.search_mode == 'sensitive'
+    assert searchbar._row_spans(0) == [(15, 21)]
+    window.destroy()
+
+
+def test_regex_metacharacters_still_work():
+    """The search text is compiled as a regex, not a literal substring"""
+    window, vte = make_terminal(["foo needle bar"])
+    searchbar = make_searchbar(vte)
+    search(searchbar, "n..dle")
+    assert searchbar._row_spans(0) == [(4, 10)]
+    window.destroy()
+
+
+def test_regex_alternation_finds_all_alternatives():
+    window, vte = make_terminal(["foo needle bar"])
+    searchbar = make_searchbar(vte)
+    search(searchbar, "needle|bar")
+    assert searchbar._row_spans(0) == [(4, 10), (11, 14)]
+    window.destroy()
+
+
+def test_smart_case_applies_to_regex():
+    """Smart case looks at the raw pattern: any uppercase forces sensitive"""
+    window, vte = make_terminal(["foo Needle needle"])
+    searchbar = make_searchbar(vte)
+    # a lowercase pattern matches both spellings
+    search(searchbar, "n..dle")
+    assert searchbar._row_spans(0) == [(4, 10), (11, 17)]
+    # uppercase in the pattern switches to strict matching
+    search(searchbar, "N..dle")
     assert searchbar._row_spans(0) == [(4, 10)]
     window.destroy()
 
@@ -203,6 +267,40 @@ def test_invalid_regex_marks_entry_and_disables_buttons():
     assert searchbar.entry.get_style_context().has_class("error")
     assert not searchbar.next.get_sensitive()
     assert not searchbar.prev.get_sensitive()
+    window.destroy()
+
+
+def test_count_label_shows_position_and_total():
+    window, vte = make_terminal(THREE_ROW_LINES)
+    searchbar = make_searchbar(vte)
+    search(searchbar, "needle")
+    assert searchbar.count_label.get_text() == "1/3"
+    searchbar.next_search(None)
+    assert searchbar.count_label.get_text() == "2/3"
+    searchbar.prev_search(None)
+    assert searchbar.count_label.get_text() == "1/3"
+    # jumping to the last match counts matches on earlier rows too
+    searchbar.next_search(None)
+    searchbar.next_search(None)
+    assert searchbar.count_label.get_text() == "3/3"
+    window.destroy()
+
+
+def test_count_label_cleared_when_search_ends():
+    window, vte = make_terminal(["foo needle bar"])
+    searchbar = make_searchbar(vte)
+    search(searchbar, "needle")
+    assert searchbar.count_label.get_text() == "1/1"
+    searchbar.entry.set_text("")
+    assert searchbar.count_label.get_text() == ""
+    window.destroy()
+
+
+def test_count_label_empty_without_matches():
+    window, vte = make_terminal(["no match here"])
+    searchbar = make_searchbar(vte)
+    search(searchbar, "needle")
+    assert searchbar.count_label.get_text() == ""
     window.destroy()
 
 

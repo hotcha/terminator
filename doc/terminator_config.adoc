@@ -237,11 +237,6 @@ Specify the path to a program which accepts a URI as an argument and
 does something relevant with it.
 This option is ignored unless *use_custom_url_handler* is set to True.
 
-*case_sensitive* = _boolean_::
-If set to True, uppercase and lowercase characters will be considered
-different when searching text in the terminal. +
-Default value: *True*
-
 *invert_search* = _boolean_::
 If set to True, the search direction will be inverted (bottom to top)
 when searching text in the terminal. +

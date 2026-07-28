@@ -116,7 +116,6 @@ DEFAULTS = {
             'clear_select_on_copy'  : False,
             'cell_width'            : 1.0,
             'cell_height'           : 1.0,
-            'case_sensitive'        : True,
             'invert_search'         : False,
             'link_single_click'     : False,
             'title_at_bottom'       : False,
