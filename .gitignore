@@ -27,3 +27,6 @@ terminatorlib/meliae
 data/terminator.appdata.xml
 data/terminator.desktop
 data/terminator.metainfo.xml
+
+## Worktrees
+.worktrees/
