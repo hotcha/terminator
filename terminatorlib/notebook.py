@@ -30,21 +30,39 @@ def install_tab_css():
     outside the tab's edges. We also reset theme-supplied border-width,
     border-image, and margin so that the colour fills the full tab width
     without gaps on either side, and we reset padding and margin on the
-    internal GTK3 GtkBox (the ``box`` child node between ``tab`` and
-    ``TabLabel``) so that the ``TabLabel`` widget fills the entire
-    content area of the notebook tab. Finally it suppresses the theme's
-    own tab backgrounds entirely (including the checked/active one):
-    every tab state is painted by TabLabel.apply_tab_color() on the
-    label itself — the theme only provides the tab bar ("container")
+    internal GTK3 GtkBox so that the ``TabLabel`` widget fills the
+    entire content area of the notebook tab. Finally it suppresses the
+    theme's own tab backgrounds entirely (including the checked/active
+    one): every tab state is painted by TabLabel.apply_tab_color() on
+    the label itself — the theme only provides the tab bar ("container")
     background behind it, so there is exactly one painted layer per tab.
+
+    Selector subtlety: TabLabel's own CSS node is also named ``box`` and
+    hangs directly under ``tab``, so the reset rule above matches it too
+    and, being more specific than a bare ``.terminator-tab-label``, would
+    win over the label's own padding rule. The label rule therefore uses
+    the full ``notebook ... tab box.terminator-tab-label`` path to stay
+    ahead of the reset in the cascade.
+
+    The 3px vertical padding on the ``tab`` node is the symmetric gap
+    above and below the tab "pill". It deliberately lives on the parent
+    tab node rather than as a margin on the TabLabel: a CSS margin on
+    the label makes Gtk.render_background/frame compute the pill's
+    rounded-rect paths from mismatched boxes, which renders wavy,
+    doubled outlines on HiDPI displays. The 1px horizontal padding
+    keeps a fixed 2px slot between any two adjacent tabs, so coloured
+    pills never touch and the separator between two plain inactive tabs
+    gets its own space to render in. The 3px vertical padding on the
+    label itself sets the pill's height (space between the text and the
+    pill's top/bottom edges).
     """
     global TAB_CSS_INSTALLED
     if TAB_CSS_INSTALLED:
         return
     css = '''
-notebook.terminator-notebook header tab { padding: 0px; margin-left: 0px; margin-right: 0px; border-width: 0px; border-image: none; background-color: transparent; background-image: none; box-shadow: none; }
-notebook.terminator-notebook header tab box { padding: 0px; margin-left: 0px; margin-right: 0px; }
-.terminator-tab-label { margin: 0px; padding: 1px 8px; }
+notebook.terminator-notebook header tab { padding: 3px 1px; margin-left: 0px; margin-right: 0px; border-width: 0px; border-image: none; background-color: transparent; background-image: none; box-shadow: none; }
+notebook.terminator-notebook header tab > box { padding: 0px; margin-left: 0px; margin-right: 0px; }
+notebook.terminator-notebook header tab box.terminator-tab-label { margin: 0px; padding: 3px 0px; }
 .terminator-tab-label > button { margin: 0px; }
 '''
     provider = Gtk.CssProvider()
@@ -796,48 +814,29 @@ class TabLabel(Gtk.HBox):
         self.apply_tab_color()
 
     def apply_tab_color(self):
-        """Apply CSS styling based on colour, active state and separator"""
+        """Restyle for the current color/active/separator state.
+
+        Table-driven: tab_style_for() resolves the color (manual or
+        default), the state key picks active / inactive / separator;
+        only the colours differ between states, the box geometry is
+        fixed (see render_tab_style)."""
         if self.css_provider is None:
             self.css_provider = Gtk.CssProvider()
             self.get_style_context().add_provider(
                     self.css_provider,
                     Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION + 200)
-        if self.tab_color and self.tab_active:
-            # Coloured active tab: solid colour pill + white border
-            # ('rounded-full bg-yellow border-2 border-white');
-            # text colour is inherited by the label and the close button
-            fg = fg_color_for(self.tab_color)
-            css = ('.terminator-tab-label { background-color: %s;'
-                   ' color: %s;'
-                   ' border: 2px solid #ffffff;'
-                   ' border-radius: 999px; }' % (self.tab_color, fg))
-        elif self.tab_color:
-            # Coloured inactive tab: 2px border in the tab's colour plus
-            # a soft inward glow ('rounded-full border-2 border-yellow
-            # shadow-inner shadow-yellow/25')
-            r = int(self.tab_color[1:3], 16)
-            g = int(self.tab_color[3:5], 16)
-            b = int(self.tab_color[5:7], 16)
-            css = ('.terminator-tab-label {'
-                   ' box-shadow: inset 0 0 5px 0 rgba(%d, %d, %d, 0.25);'
-                   ' border: 2px solid %s;'
-                   ' border-radius: 999px; }' % (r, g, b, self.tab_color))
-        elif self.tab_active:
-            # Uncoloured active tab: plain filled pill, no border
-            # ('rounded-full bg-white')
-            css = ('.terminator-tab-label {'
-                   ' background-color: @theme_base_color;'
-                   ' border-radius: 999px; }')
+        style = tab_style_for(self.tab_color)
+        if self.tab_active:
+            state = style['active']
         elif self.tab_separator:
-            # Plain inactive tab followed by another one: "|" separator,
-            # inset a little from the top and bottom edges
-            css = ('.terminator-tab-label {'
-                   ' margin-top: 4px; margin-bottom: 4px;'
-                   ' border-right: 1px solid alpha(@theme_fg_color, 0.25); }')
+            # Only ever set on plain inactive tabs (see
+            # _update_tab_separators); .get() keeps the coloured sets,
+            # which have no 'separator' key, safe for synthetic states
+            state = style.get('separator', style['inactive'])
         else:
-            # Everything else keeps the theme's own look
-            css = ''
-        self.css_provider.load_from_data(css.encode('utf-8'))
+            state = style['inactive']
+        self.css_provider.load_from_data(
+                render_tab_style(state).encode('utf-8'))
         self.queue_draw()
 
     def show_tab_menu(self, x, y):
@@ -894,6 +893,66 @@ def fg_color_for(bg_hex):
     if luminance > 0.55:
         return '#1a1a1a'
     return '#f2f2f2'
+
+# Tab style sets, keyed by state within each colour. 'bg'/'fg'/'border'/
+# 'shadow'/'radius' map straight onto CSS properties; missing keys simply
+# render nothing (e.g. a plain inactive tab is fully transparent).
+TAB_STYLE_DEFAULT = {
+    # Uncoloured active tab: pure white pill, dark text, grey border a
+    # shade darker than the surrounding header grey
+    # ('rounded-full bg-white border-2 border-gray-300')
+    'active':    {'bg': '#ffffff', 'fg': '#1a1a1a', 'border': '#c4c4c4'},
+    'inactive':  {},
+    # "|" separator between two plain inactive tabs: an inset box-shadow
+    # band inside the transparent right border slot. Not border-right on
+    # purpose: adjacent border sides meet in 45-degree miter joins (even
+    # when the neighbours are transparent), turning the line into a
+    # trapezoid. Square corners keep the shadow band a plain rectangle.
+    'separator': {'radius': '0',
+                  'shadow': 'inset -1px 0 0 alpha(@theme_fg_color, 0.25)'},
+}
+
+_tab_style_cache = {}
+
+def tab_style_for(color):
+    """Return the style set for a tab color ('#rrggbb' or None).
+
+    None maps to TAB_STYLE_DEFAULT; a configured color derives its
+    active/inactive variants once and caches them. Active is the solid
+    pill ('rounded-full bg-yellow border-2 border-white'; the fg colour
+    is inherited by the label text and the close button), inactive the
+    colour ring plus a soft inward glow ('rounded-full border-2
+    border-yellow shadow-inner shadow-yellow/25')."""
+    if color is None:
+        return TAB_STYLE_DEFAULT
+    if color not in _tab_style_cache:
+        r, g, b = (int(color[i:i + 2], 16) for i in (1, 3, 5))
+        _tab_style_cache[color] = {
+            'active':   {'bg': color, 'fg': fg_color_for(color),
+                         'border': '#ffffff'},
+            'inactive': {'border': color,
+                         'shadow': 'inset 0 0 5px 0 rgba(%d, %d, %d, 0.25)'
+                                   % (r, g, b)},
+        }
+    return _tab_style_cache[color]
+
+_TAB_STYLE_PROPS = (('bg', 'background-color'), ('fg', 'color'),
+                    ('border', 'border-color'), ('shadow', 'box-shadow'))
+
+def render_tab_style(state):
+    """Render one style-set entry to a CSS rule.
+
+    The 2px transparent border is the shared geometry placeholder for
+    every state; the symmetric gap around the pill lives as padding on
+    the parent ``tab`` node (see install_tab_css) — never as a margin
+    on this widget, which triggers a GTK3 glitch that renders rounded
+    borders wavy and doubled on HiDPI displays."""
+    parts = ['border: 2px solid transparent;',
+             'border-radius: %s;' % state.get('radius', '999px')]
+    for key, prop in _TAB_STYLE_PROPS:
+        if key in state:
+            parts.append('%s: %s;' % (prop, state[key]))
+    return '.terminator-tab-label { %s }' % ' '.join(parts)
 
 def get_tab_colors(config):
     """Return the configured list of tab colors, padded with defaults"""
@@ -983,12 +1042,14 @@ class TabColorSwatch(Gtk.DrawingArea):
                 cr.stroke()
 
 class TabColorPopover(Gtk.Popover):
-    """Tab context popup holding the move-to-new-window action and a
-    horizontal row of tab color swatches.
+    """Tab context popup holding tab actions (move to a new window, close
+    other tabs, close tabs to the right) and a horizontal row of tab color
+    swatches.
 
     A Gtk.Popover is used instead of a Gtk.Menu because menus do not
     deliver pointer events to child widgets inside their items, which
-    the interactive swatches need."""
+    the interactive swatches need. Actions use Gtk.ModelButton so they
+    render borderless, like ordinary menu items."""
 
     def __init__(self, tablabel):
         GObject.GObject.__init__(self, relative_to=tablabel)
@@ -998,13 +1059,27 @@ class TabColorPopover(Gtk.Popover):
         vbox = Gtk.VBox(spacing=6)
         vbox.set_border_width(6)
 
-        move = Gtk.Button(label=_('_Move to New Window'), use_underline=True)
-        move.set_relief(Gtk.ReliefStyle.NONE)
-        move.get_style_context().add_class('flat')
-        move.set_halign(Gtk.Align.FILL)
-        move.get_child().set_xalign(0.0)
+        move = Gtk.ModelButton(text=_('_Move to New Window'),
+                               use_underline=True)
         move.connect('clicked', self.on_move_to_new_window_clicked)
         vbox.pack_start(move, False, False, 0)
+
+        nb = tablabel.notebook
+        labels = [nb.get_tab_label(nb.get_nth_page(i))
+                  for i in range(nb.get_n_pages())]
+        tabnum = labels.index(tablabel) if tablabel in labels else -1
+
+        close_other = Gtk.ModelButton(text=_('_Close Other Tabs'),
+                                      use_underline=True)
+        close_other.set_sensitive(len(labels) > 1)
+        close_other.connect('clicked', self.on_close_other_tabs_clicked)
+        vbox.pack_start(close_other, False, False, 0)
+
+        close_right = Gtk.ModelButton(text=_('Close Tabs to the _Right'),
+                                      use_underline=True)
+        close_right.set_sensitive(tabnum > -1 and tabnum < len(labels) - 1)
+        close_right.connect('clicked', self.on_close_tabs_right_clicked)
+        vbox.pack_start(close_right, False, False, 0)
 
         vbox.pack_start(Gtk.Separator(), False, False, 0)
 
@@ -1035,6 +1110,31 @@ class TabColorPopover(Gtk.Popover):
                 _screen, x, y = seat.get_pointer().get_position()
                 nb.create_window_detach(nb, page, x, y)
                 return
+
+    def on_close_other_tabs_clicked(self, _button):
+        """Close every tab except this one"""
+        self.popdown()
+        tablabel = self.tablabel
+        nb = tablabel.notebook
+        labels = [nb.get_tab_label(nb.get_nth_page(i))
+                  for i in range(nb.get_n_pages())]
+        for label in labels:
+            if label is not tablabel:
+                # closetab() looks the page number up fresh by label, so
+                # it stays correct as pages are removed
+                nb.closetab(label, label)
+
+    def on_close_tabs_right_clicked(self, _button):
+        """Close every tab to the right of this one"""
+        self.popdown()
+        tablabel = self.tablabel
+        nb = tablabel.notebook
+        labels = [nb.get_tab_label(nb.get_nth_page(i))
+                  for i in range(nb.get_n_pages())]
+        if tablabel not in labels:
+            return
+        for label in labels[labels.index(tablabel) + 1:]:
+            nb.closetab(label, label)
 
     def on_pick(self, color):
         self.tablabel.set_tab_color(color)

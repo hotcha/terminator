@@ -279,6 +279,14 @@ msgstr "无颜色"
 msgid "_Move to New Window"
 msgstr "移动到新窗口(_M)"
 
+#: ../terminatorlib/notebook.py
+msgid "_Close Other Tabs"
+msgstr "关闭其他标签页(_C)"
+
+#: ../terminatorlib/notebook.py
+msgid "Close Tabs to the _Right"
+msgstr "关闭右侧标签页(_R)"
+
 #: ../terminatorlib/notebook.py:955
 msgid "Tab color"
 msgstr "标签页颜色"
