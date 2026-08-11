@@ -250,7 +250,7 @@ class TerminalPopupMenu(object):
 
             menu.append(Gtk.SeparatorMenuItem())
 
-        if self.config['show_titlebar'] == False:
+        if self.config['show_titlebar'] == False and self.config['show_group_button']:
             item = Gtk.MenuItem.new_with_mnemonic(_('Grouping'))
             submenu = self.terminal.populate_group_menu()
             submenu.show_all()

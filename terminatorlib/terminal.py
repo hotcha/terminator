@@ -718,6 +718,8 @@ class Terminal(Gtk.VBox):
         # Handle child command exiting
         self.cnxids.remove_signal(self.vte, 'child-exited')
 
+        self.titlebar.update_group_button_visibility()
+
         if self.config['exit_action'] == 'restart':
             self.cnxids.new(self.vte, 'child-exited', self.spawn_child, True)
         elif self.config['exit_action'] == 'hold':

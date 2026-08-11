@@ -120,6 +120,7 @@ DEFAULTS = {
             'link_single_click'     : False,
             'title_at_bottom'       : False,
             'detachable_tabs'       : True,
+            'show_group_button'     : True,
 
             'new_tab_after_current_tab': False,
             'window_decoration_style': 'auto',
@@ -736,6 +737,21 @@ class ConfigBase(Borg):
                     section.update(parser[section_name])
                 except KeyError as ex:
                     dbg('skipping missing section %s' % section_name)
+
+        # Migrate the legacy per-profile 'show_group_button' to the global
+        # configuration (it is an appearance setting, not a profile one).
+        # Prefer the 'default' profile value when several profiles set it.
+        # Values coming from the file are plain strings (the key is no longer
+        # in the profile configspec), so normalise them to booleans.
+        if 'default' in self.profiles and \
+                'show_group_button' in self.profiles['default']:
+            value = self.profiles['default']['show_group_button']
+            if isinstance(value, str):
+                value = value.lower() in ('true', 'yes', 'on', '1')
+            self.global_config['show_group_button'] = value
+        for profile in self.profiles:
+            if 'show_group_button' in self.profiles[profile]:
+                del self.profiles[profile]['show_group_button']
 
         self.loaded = True
 

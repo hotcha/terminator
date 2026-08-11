@@ -1,5 +1,6 @@
 #!/bin/sh
 # Stupid workaround for intltools not handling extensionless files
+cd "$(dirname "$0")" || exit 1
 ln -s terminator ../terminator.py
 ln -s remotinator ../remotinator.py
 

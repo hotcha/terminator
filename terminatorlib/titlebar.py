@@ -84,16 +84,28 @@ class Titlebar(Gtk.EventBox):
 
         hbox = Gtk.HBox()
         hbox.pack_start(self.ebox, False, True, 0)
-        hbox.pack_start(Gtk.VSeparator(), False, True, 0)
+        self.group_sep = Gtk.VSeparator()
+        hbox.pack_start(self.group_sep, False, True, 0)
         hbox.pack_start(viewport, True, True, 0)
         hbox.pack_end(self.bellicon, False, False, 2)
 
         self.add(hbox)
         hbox.show_all()
+
+        self.update_group_button_visibility()
         self.set_no_show_all(True)
         self.show()
 
         self.connect('button-press-event', self.on_clicked)
+
+    def update_group_button_visibility(self):
+        """Show or hide the group button according to the configuration"""
+        if self.config['show_group_button']:
+            self.ebox.show()
+            self.group_sep.show()
+        else:
+            self.ebox.hide()
+            self.group_sep.hide()
 
     def connect_icon(self, func):
         """Connect the supplied function to clicking on the group icon"""

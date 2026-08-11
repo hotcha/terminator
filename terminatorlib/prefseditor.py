@@ -328,6 +328,9 @@ class PrefsEditor:
         # Extra styling
         widget = guiget('extrastylingcheck')
         widget.set_active(self.config['extra_styling'])
+        # Show group button on titlebar
+        widget = guiget('show_group_button')
+        widget.set_active(self.config['show_group_button'])
         # Window decoration style
         option = self.config['window_decoration_style']
         widget = guiget('window_decoration_style_combo')
@@ -993,6 +996,14 @@ class PrefsEditor:
         """Show titlebar setting changed"""
         self.config['show_titlebar'] = widget.get_active()
         self.config.save()
+
+    def on_show_group_button_toggled(self, widget):
+        """Show group button setting changed"""
+        self.config['show_group_button'] = widget.get_active()
+        self.config.save()
+        # Update already-open terminals immediately
+        terminator = Terminator()
+        terminator.reconfigure()
 
     def on_copy_on_selection_toggled(self, widget):
         """Copy on selection setting changed"""
